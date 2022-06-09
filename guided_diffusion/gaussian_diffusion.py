@@ -383,7 +383,7 @@ class GaussianDiffusion:
         )
         return new_mean
 
-    def condition_score(self, cond_fn, p_mean_var, x, t, model_kwargs=None):
+    def condition_score(self, cond_fn, p_mean_var, x, t, model_kwargs=None, disco_args=None):
         """
         Compute what the p_mean_variance output would have been, should the
         model's score function be conditioned by cond_fn.
@@ -397,7 +397,7 @@ class GaussianDiffusion:
 
         eps = self._predict_eps_from_xstart(x, t, p_mean_var["pred_xstart"])
         eps = eps - (1 - alpha_bar).sqrt() * cond_fn(
-            x, self._scale_timesteps(t), **model_kwargs
+            x, self._scale_timesteps(t), disco_args=disco_args, **model_kwargs
         )
 
         out = p_mean_var.copy()
@@ -407,7 +407,7 @@ class GaussianDiffusion:
         )
         return out
 
-    def condition_score_with_grad(self, cond_fn, p_mean_var, x, t, model_kwargs=None):
+    def condition_score_with_grad(self, cond_fn, p_mean_var, x, t, model_kwargs=None, disco_args=None):
         """
         Compute what the p_mean_variance output would have been, should the
         model's score function be conditioned by cond_fn.
@@ -421,7 +421,7 @@ class GaussianDiffusion:
 
         eps = self._predict_eps_from_xstart(x, t, p_mean_var["pred_xstart"])
         eps = eps - (1 - alpha_bar).sqrt() * cond_fn(
-            x, t, p_mean_var, **model_kwargs
+            x, t, p_mean_var, disco_args=disco_args, **model_kwargs
         )
 
         out = p_mean_var.copy()
@@ -654,6 +654,7 @@ class GaussianDiffusion:
         clip_denoised=True,
         denoised_fn=None,
         cond_fn=None,
+        disco_args=None,
         model_kwargs=None,
         eta=0.0,
     ):
@@ -671,7 +672,7 @@ class GaussianDiffusion:
             model_kwargs=model_kwargs,
         )
         if cond_fn is not None:
-            out = self.condition_score(cond_fn, out_orig, x, t, model_kwargs=model_kwargs)
+            out = self.condition_score(cond_fn, out_orig, x, t, model_kwargs=model_kwargs, disco_args=disco_args)
         else:
             out = out_orig
 
@@ -706,6 +707,7 @@ class GaussianDiffusion:
         clip_denoised=True,
         denoised_fn=None,
         cond_fn=None,
+        disco_args=None,
         model_kwargs=None,
         eta=0.0,
     ):
@@ -725,7 +727,7 @@ class GaussianDiffusion:
                 model_kwargs=model_kwargs,
             )
             if cond_fn is not None:
-                out = self.condition_score_with_grad(cond_fn, out_orig, x, t,
+                out = self.condition_score_with_grad(cond_fn, out_orig, x, t, disco_args=disco_args,
                                                      model_kwargs=model_kwargs)
             else:
                 out = out_orig
@@ -801,6 +803,7 @@ class GaussianDiffusion:
         clip_denoised=True,
         denoised_fn=None,
         cond_fn=None,
+        disco_args=None,
         model_kwargs=None,
         device=None,
         progress=False,
@@ -823,6 +826,7 @@ class GaussianDiffusion:
             clip_denoised=clip_denoised,
             denoised_fn=denoised_fn,
             cond_fn=cond_fn,
+            disco_args=disco_args,
             model_kwargs=model_kwargs,
             device=device,
             progress=progress,
@@ -843,6 +847,7 @@ class GaussianDiffusion:
         clip_denoised=True,
         denoised_fn=None,
         cond_fn=None,
+        disco_args=None,
         model_kwargs=None,
         device=None,
         progress=False,
@@ -896,6 +901,7 @@ class GaussianDiffusion:
                     clip_denoised=clip_denoised,
                     denoised_fn=denoised_fn,
                     cond_fn=cond_fn,
+                    disco_args=disco_args,
                     model_kwargs=model_kwargs,
                     eta=eta,
                 )
